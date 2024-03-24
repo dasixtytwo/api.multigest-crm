@@ -1,0 +1,15 @@
+﻿.swagger-ui .topbar-wrapper img {
+	content: url("https://upload.wikimedia.org/wikipedia/commons/a/ab/Swagger-logo.png");
+	height: 70px;
+}
+
+.swagger-ui .topbar {
+	background-color: #FFFFFF;
+	border: 1px solid #bdbdbd;
+	padding: 10px 0;
+	color: #000000;
+}
+
+	.swagger-ui .topbar .download-url-wrapper .select-label {
+		color: #000000;
+	}
