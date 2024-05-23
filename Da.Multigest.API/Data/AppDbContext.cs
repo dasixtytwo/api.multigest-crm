@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using SharedClassLibrary.Models.Contacts;
 using SharedClassLibrary.Models.Tenants;
 using System.Reflection;
 
@@ -10,6 +11,7 @@ public class AppDbContext(DbContextOptions options) : IdentityDbContext<Applicat
 	public string? CurrentTenantId { get; set; }
 
 	public DbSet<Tenant> Tenants { get; set; }
+	public DbSet<Contact> Contacts { get; set; }
 
 	// On Model Creating - multitenancy query filter, fires once on app start
     protected override void OnModelCreating(ModelBuilder builder) 
@@ -28,7 +30,7 @@ public class AppDbContext(DbContextOptions options) : IdentityDbContext<Applicat
 			{
 				case EntityState.Added:
 				case EntityState.Modified:
-					entry.Entity.TenantId = CurrentTenantId;
+					entry.Entity.TenantId = CurrentTenantId!;
 					break;
 			}
 		}

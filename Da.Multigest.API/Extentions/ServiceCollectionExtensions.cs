@@ -1,10 +1,12 @@
-﻿using Da.Multigest.API.Data;
+﻿using Asp.Versioning;
+using Da.Multigest.API.Data;
 using Da.Multigest.API.Repositories;
 using Da.Multigest.API.Repositories.Tenants;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Primitives;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
@@ -42,7 +44,24 @@ public static class ServiceCollectionExtensions
 		{
 			options.Filters.Add(new RequireHttpsAttribute());
 		});
-		services.AddEndpointsApiExplorer();
+		services.AddApiVersioning(options =>
+		{
+			options.DefaultApiVersion = new ApiVersion(1);
+			options.AssumeDefaultVersionWhenUnspecified = true;
+			options.ReportApiVersions = true;
+			options.ApiVersionReader = ApiVersionReader.Combine(
+				new QueryStringApiVersionReader("api-version"),
+				new HeaderApiVersionReader("api-version"),
+				new UrlSegmentApiVersionReader()
+			);
+		})
+          .AddApiExplorer(options =>
+          {
+              options.GroupNameFormat = "'v'V";
+              options.SubstituteApiVersionInUrl = true;
+          });
+
+        services.AddEndpointsApiExplorer();
 
 		return services;
 	}
@@ -129,14 +148,21 @@ public static class ServiceCollectionExtensions
 		return services;
 	}
 
-	#region Helper Functions
+    #region Helper Functions
 
-	private static T Bind<T>(this IConfiguration configuration, string sectionName) where T : new()
+    public static string GetCorrelationId(this HttpContext httpContext)
+    {
+        httpContext.Request.Headers.TryGetValue("x-correlation-id", out StringValues correlationId);
+        return correlationId.FirstOrDefault() ?? Guid.NewGuid().ToString();
+    }
+
+    private static T Bind<T>(this IConfiguration configuration, string sectionName) where T : new()
 	{
 		var bindedClass = new T();
 		configuration.GetSection(sectionName).Bind(bindedClass);
 		return bindedClass;
 	}
+	
 	#endregion
 
 }
